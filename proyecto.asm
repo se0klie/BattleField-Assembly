@@ -620,16 +620,12 @@ atualizastats proc
 	  mov DH, AL
 	  loop REPETEACERTOS 
 	  ESCREVEACERTOS:
-	  mov AL, DL
-	  mov DL, DH
-	  add DL, 48
-	  call writedirect
+	  
 	  mov DL, coltiros+1
       mov DH, linacertos
       call posicionacursor
       xor DX,DX
       mov DL, AL
-      call writedirect
       
     pop_all
     ret
@@ -652,7 +648,7 @@ endp
     jmp MISS
 
 
-;acerto el tiro ...
+
   GOLPE:
     mov bh,coluna       ;pisicion 0,0 temporal linea 7 y columna 4
     mov al,2
@@ -687,7 +683,9 @@ endp
     
   FIM_FS:
     ret
-endp   
+endp
+;_________________________________________________________________________________________________________________________________
+;_________________________________________________________________________________________________________________________________
 configboardcomputer proc  ;proc para crear el tablero del computador
     ;"Colocando los barcos del computador."
     mov bh,2
@@ -749,7 +747,9 @@ configboardcomputer proc  ;proc para crear el tablero del computador
     call addbarco ;agregar el barco al vector de barcos
  
     ret
-endp 
+endp
+;_________________________________________________________________________________________________________________________________
+;_________________________________________________________________________________________________________________________________
 desenhabarco proc ;proc dibujar los barcos en la pantalla
     ;la posici?n 0.0 tiene la linea 7 y la columna 33 --- la posicion 9.9 tiene la l?nea 16 y la columna 51
     ;preparacaoo das coordenadas
@@ -784,6 +784,9 @@ desenhabarco proc ;proc dibujar los barcos en la pantalla
   FIMDESENHO:
     ret
 endp
+
+;_________________________________________________________________________________________________________________________________
+;_________________________________________________________________________________________________________________________________
 verifyshot proc ;comprueba si el tiro del jugador acerto o no, mostrando el mensaje apropiado
     mov bx,0
     mov cx,20
@@ -831,7 +834,9 @@ verifyshot proc ;comprueba si el tiro del jugador acerto o no, mostrando el mens
   fimVS:
     ret
 endp
-      
+
+;_________________________________________________________________________________________________________________________________
+;_________________________________________________________________________________________________________________________________
 yourturn proc
     push_all
   LER_OUTRO_INPUT:  
@@ -897,6 +902,9 @@ yourturn proc
     pop_all
     ret
 endp
+
+;_________________________________________________________________________________________________________________________________
+;_________________________________________________________________________________________________________________________________
 readinitgame proc                   ; lee la entrada ENTER para jugar S - SALIR
     push ax
   LECTURAJUEGO:
@@ -915,7 +923,9 @@ readinitgame proc                   ; lee la entrada ENTER para jugar S - SALIR
     pop ax
     ret
 endp
-           
+
+;_________________________________________________________________________________________________________________________________
+;_________________________________________________________________________________________________________________________________
 game_screen proc      ;Disena la pantalla principal de JUEGO
     mov ubicando_portaviones, 0
     mov ubicando_crucero, 0
@@ -1040,13 +1050,6 @@ game_screen proc      ;Disena la pantalla principal de JUEGO
     mov BL,3 ; Linha inicial
     mov DL,COLUNA_STATS 
     
-    mov DH,BL    
-    call posicionacursor 
-    push DX
-    mov DX,OFFSET MSGSTAT1     
-    call printstring
-    pop DX  
-    inc BL
     
     mov DH,BL    
     call posicionacursor 
@@ -1056,13 +1059,6 @@ game_screen proc      ;Disena la pantalla principal de JUEGO
     pop DX  
     inc BL
     
-    mov DH,BL    
-    call posicionacursor 
-    push DX
-    mov DX,OFFSET MSGSTAT3     
-    call printstring
-    pop DX  
-    inc BL
     
     call atualizastats
     
