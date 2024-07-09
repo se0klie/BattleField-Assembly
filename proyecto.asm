@@ -23,8 +23,8 @@ pagcursor db 00h
 ;VARIABLES PARA CONTABILIZAR LOS TIROS
 tiros db 00h
 tiros_repetidos db 20 dup(100)
-coltiros EQU 73
-lintiros EQU 5
+coltiros EQU 7
+lintiros EQU 22
 acertos db 00h 
 linacertos EQU 6
 ;BANDERAS PARA UBICAR 'P', 'C' Y 'S'
@@ -43,18 +43,18 @@ LF EQU 10    ; LINEA
    MSGINICIO3 DB 0BAh,'         JESUS SUAREZ,   HAILIE JIMENEZ          ',0BAh,'$' 
 
    
-   CLINICIAL EQU 22
+   CLINICIAL EQU 14
 
    COLUNA_CONFIG EQU 30   
     
    MSG_CONFIG21 DB '                    ','$'
-   MSG_CONFIG22 DB '                   ESPERE 1 MOMENTO       ','$'
+   MSG_CONFIG22 DB '                   ESPERE UN MOMENTO       ','$'
  
     COLUNA_TIRO EQU 1 
-    COLUNA_STATS EQU 58
+    ;COLUNA_STATS EQU 28
     
     MSGJUEGOTIRO1 DB   3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,'$'
-    MSGJUEGOTIRO2 DB   0B3h,'  JUEGO EN DESARROLLO ',0B3h,'$'
+    MSGJUEGOTIRO2 DB   0B3h,'  BATALLA NAVAL ',0B3h,'$'
     MSGJUEGOTIRO3 DB   3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,'$'
     MSGJUEGOTIRO4 DB   0B3h,'  A',0B3h,'B',0B3h,'C',0B3h,'D',0B3h,'E',0B3h,'F',0B3h,'$'
     MSGJUEGOTIRO6 DB   0B3h,'1            ',0B3h,'$'
@@ -66,15 +66,15 @@ LF EQU 10    ; LINEA
     MSGJUEGOTIRO15  DB 3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,'$'
     
    
-    MSGSTAT1 DB  0B3h,'Jugador           ',0B3h,'$'
-    MSGSTAT2 DB  0B3h,'  Tiros:          ',0B3h,'$'
-    MSGSTAT3 DB  0B3h,'  Aciertos:       ',0B3h,'$'  
+    ;MSGSTAT1 DB  0B3h,'Jugador           ',0B3h,'$'
+    ;MSGSTAT2 DB  0B3h,'  Tiros:          ',0B3h,'$'
+    ;MSGSTAT3 DB  0B3h,'  Aciertos:       ',0B3h,'$'  
      
     COLUNA_COORDENADAS EQU 23
-    COLUNA_MENSAGENS EQU 39
+    COLUNA_MENSAGENS EQU 38
     
     MSGINPUT1 DB 0DAh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,3Dh,0BFh,'$' 
-    MSGINPUT2 DB 0B3h,'MISIL EN COORDENADA:      ',0B3h,'MENSAJE: $'    
+    MSGINPUT2 DB ,'MISIL 00 EN LA CELDA:      ',0B3h,'MENSAJE: $'    
 
     MSG_TURNO1 db "SU TURNO$"
 
@@ -307,7 +307,7 @@ hitshot proc
     call printstring
     cmp tamano_p, 4
     je P_HUNDIDO
-    cmp tamano_c, 3
+    cmp tamano_c, 2
     je C_HUNDIDO
     cmp tamano_s, 2
     je S_HUNDIDO
@@ -724,7 +724,7 @@ configboardcomputer proc  ;proc para crear el tablero del computador
     mov ubicando_submarino, 0  
     call RNG ;"input" del computador
     mov bx, endereco_lin_col
-    mov tamanhobarco, 4
+    mov tamanhobarco, 3
     call verificanavio
     cmp BX,100  ;si es 100, la posicion no es valida
     jne CPU_BVALIDO
@@ -1048,13 +1048,13 @@ game_screen proc      ;Disena la pantalla principal de JUEGO
   FIMMATRIZTIRO:
     ;Matriz de disparo completo, termine de dibujar la pantalla
     mov BL,3 ; Linha inicial
-    mov DL,COLUNA_STATS 
+    ;mov DL,COLUNA_STATS 
     
     
     mov DH,BL    
     call posicionacursor 
     push DX
-    mov DX,OFFSET MSGSTAT2     
+    ;mov DX,OFFSET MSGSTAT2     
     call printstring
     pop DX  
     inc BL
@@ -1250,7 +1250,7 @@ GAMESTART:
     cmp tiros, 18
     je USUPERDIO
        
-    cmp acertos,12 ;5+4+3 = 12       ;12 aciertos gana    
+    cmp acertos,11 ;5+3+3 = 11       ;11 aciertos gana    
     je USERGANO
     jmp GAMESTART
     
