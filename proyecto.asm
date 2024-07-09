@@ -203,13 +203,13 @@ drawmiss proc    ;disena el simbolo de miss en la matriz de tiros
     pop_all
     ret
 endp 
-desenhaquadrado proc 
+desenhaquadrado proc
     push_all
     mov bh,02
     mov AH,09h
-    mov AL,0FEh
+    mov AL,0A4h ; símbolo ASCII 254 (¦)
     mov CX,1
-    mov BL,09h
+    mov BL,0Eh  ; color amarillo
     int 10h
     pop_all
     ret
@@ -1265,10 +1265,14 @@ GAMESTART:
     
 USERGANO:
     call victorymsg
-    call finalscreen   
+    jmp FINALSCREENN
+   
 USUPERDIO:
     call defeatmsg
-    call finalscreen    
+    jmp FINALSCREENN 
+FINALSCREENN:
+    call finalscreen
+    jmp LEITURAFINAL
     
 TELA_FINAL:
     call finalscreen
