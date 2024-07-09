@@ -1243,14 +1243,17 @@ start proc                          ;PROCEDIMIENTO INIDICAL
 	rep stosw                        ;REPETIR HASTA Q 100 PALABRAS SE INICIALICEN CON 0
     call configboardcomputer        ; llamar a proc para preparar la placa de la computadora
     call game_screen                ;COMIENZA A LLAMARSE OTROS METODOS PARA INICIAR
+
 GAMESTART:
-    call yourturn                     ;GENERA TURNO DE USUARIO
-    cmp tiros, 18                     ;LIMITE DE TIROS
-    je USUPERDIO
-       
-    cmp acertos,11 ;5+3+3 = 11       ;11 aciertos gana    
-    je USERGANO
-    jmp GAMESTART
+    call yourturn
+
+    cmp acertos, 11    ; Verifica primero si se cumplen los 11 aciertos
+    je USERGANO        ; Si se cumplen, salta a la etiqueta de victoria
+    
+    cmp tiros, 18      ; Si no, verifica si ya se completaron los tiros
+    je USUPERDIO       ; Si se completaron, salta a la etiqueta de derrota
+    
+    jmp GAMESTART      ; Si ninguna de las condiciones se cumple, repite el ciclo
     
     
 USERGANO:                            ;SI GANA SE MUESTRA PANTALLA DE victoria
