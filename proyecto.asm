@@ -27,14 +27,14 @@ coltiros EQU 7
 lintiros EQU 22
 acertos db 00h 
 linacertos EQU 6
-;BANDERAS PARA UBICAR 'P', 'C' Y 'S'
+;BANDERAS PARA UBICAR 'P', 'D' Y 'S'
 ubicando_portaviones db 0
-ubicando_crucero db 0
+ubicando_destructor db 0
 ubicando_submarino db 0
 
 ;CONTADORES PARA CONFIRMAR BARCOS HUNDIDOS (ENCERAR AL FINAL DEL JUEGO)
 tamano_p db 0
-tamano_c db 0
+tamano_d db 0
 tamano_s db 0
 CR EQU 13    ; ENTER
 LF EQU 10    ; LINEA  
@@ -82,7 +82,7 @@ LF EQU 10    ; LINEA
     
     MSG_P_HUNDIDO db "  PORTAVIONES HUNDIDO$"
     
-    MSG_C_HUNDIDO db "  CRUCERO HUNDIDO$"
+    MSG_D_HUNDIDO db "  DESTRUCTOR HUNDIDO$"
     
     MSG_S_HUNDIDO db "  SUBMARINO HUNDIDO$"
 
@@ -307,8 +307,8 @@ hitshot proc
     call printstring
     cmp tamano_p, 4
     je P_HUNDIDO
-    cmp tamano_c, 2
-    je C_HUNDIDO
+    cmp tamano_d, 2
+    je D_HUNDIDO
     cmp tamano_s, 2
     je S_HUNDIDO
     jne FIN_HITSHOT
@@ -317,10 +317,10 @@ hitshot proc
     call printstring
     mov tamano_p, 0
     jmp FIN_HITSHOT
-  C_HUNDIDO:
-    lea DX,MSG_C_HUNDIDO   ;"Acerto el tiro!!"
+  D_HUNDIDO:
+    lea DX,MSG_D_HUNDIDO   ;"Acerto el tiro!!"
     call printstring
-    mov tamano_c, 0
+    mov tamano_d, 0
     jmp FIN_HITSHOT
   S_HUNDIDO:
     lea DX,MSG_S_HUNDIDO   ;"Acerto el tiro!!"
@@ -537,16 +537,16 @@ addbarco proc  ;necesita indice en BX, direccion de matriz en SI y tamano de bar
     ;mov dl,1        ;AQUI SE PONE EL VALOR EN LA MATRIZ DE JUEGO
     cmp ubicando_portaviones, 1
     je UBICAR_PORTAVIONES
-    cmp ubicando_crucero, 1
-    je UBICAR_CRUCERO
+    cmp ubicando_destructor, 1
+    je UBICAR_DESTRUCTOR
     cmp ubicando_submarino, 1
     je UBICAR_SUBMARINO
     
     UBICAR_PORTAVIONES:
         mov dl, 'P'
         jmp DEFINIR_SENTIDO
-    UBICAR_CRUCERO:
-        mov dl, 'C'
+    UBICAR_DESTRUCTOR:
+        mov dl, 'D'
         jmp DEFINIR_SENTIDO
     UBICAR_SUBMARINO:
         mov dl, 'S'
@@ -641,7 +641,7 @@ endp
     ;Vector modificado   
     cmp bx, 'P'
     je GOLPE
-    cmp bx, 'C'
+    cmp bx, 'D'
     je GOLPE
     cmp bx, 'S'
     je GOLPE
@@ -705,7 +705,7 @@ configboardcomputer proc  ;proc para crear el tablero del computador
     ;Ubicacion
   CPU_PORTA_AVIOES:
     mov ubicando_portaviones, 1
-    mov ubicando_crucero, 0
+    mov ubicando_destructor, 0
     mov ubicando_submarino, 0   
     call RNG ;"input" del computador
     mov bx, endereco_lin_col
@@ -720,7 +720,7 @@ configboardcomputer proc  ;proc para crear el tablero del computador
 
   CPU_NAVIO_GUERRA:
     mov ubicando_portaviones, 0
-    mov ubicando_crucero, 1
+    mov ubicando_destructor, 1
     mov ubicando_submarino, 0  
     call RNG ;"input" del computador
     mov bx, endereco_lin_col
@@ -734,7 +734,7 @@ configboardcomputer proc  ;proc para crear el tablero del computador
 
   CPU_SUBMARINO:
     mov ubicando_portaviones, 0
-    mov ubicando_crucero, 0
+    mov ubicando_destructor, 0
     mov ubicando_submarino, 1   
     call RNG ;"input" del computador
     mov bx, endereco_lin_col
@@ -808,8 +808,8 @@ verifyshot proc ;comprueba si el tiro del jugador acerto o no, mostrando el mens
     mov SI,OFFSET matriz_navios_comp
     cmp byte ptr [SI+BX], 'P'
     je GOLPEO_PORTAVIONES
-    cmp byte ptr [SI+BX], 'C'
-    je GOLPEO_CRUCERO
+    cmp byte ptr [SI+BX], 'D'
+    je GOLPEO_DESTRUCTOR
     cmp byte ptr [SI+BX], 'S'
     je GOLPEO_SUBMARINO        
     
@@ -820,9 +820,9 @@ verifyshot proc ;comprueba si el tiro del jugador acerto o no, mostrando el mens
     call hitshot
     mov bx,'P'   ;Si lo hizo bien, BX sale del proceso con 1
     jmp fimVS
-  GOLPEO_CRUCERO:
+  GOLPEO_DESTRUCTOR:
     call hitshot
-    mov bx,'C'   ;Si lo hizo bien, BX sale del proceso con 1
+    mov bx,'D'   ;Si lo hizo bien, BX sale del proceso con 1
     jmp fimVS
   GOLPEO_SUBMARINO:
     call hitshot
@@ -885,15 +885,15 @@ yourturn proc
   ATIRAR:
     cmp bl, 'P'
     je INCREMENTAR_CONTADOR_P
-    cmp bl, 'C'
-    je INCREMENTAR_CONTADOR_C
+    cmp bl, 'D'
+    je INCREMENTAR_CONTADOR_D
     cmp bl, 'S'
     je INCREMENTAR_CONTADOR_S    
   INCREMENTAR_CONTADOR_P:
     inc tamano_p
     jmp STATS
-  INCREMENTAR_CONTADOR_C:
-    inc tamano_c
+  INCREMENTAR_CONTADOR_D:
+    inc tamano_d
     jmp STATS
   INCREMENTAR_CONTADOR_S:
     inc tamano_s
@@ -928,7 +928,7 @@ endp
 ;_________________________________________________________________________________________________________________________________
 game_screen proc      ;Disena la pantalla principal de JUEGO
     mov ubicando_portaviones, 0
-    mov ubicando_crucero, 0
+    mov ubicando_destructor, 0
     mov ubicando_submarino, 0
     push_all 
     mov al, 2
