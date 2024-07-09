@@ -1228,7 +1228,15 @@ finalscreen proc  ;disena la pantalla final
     mov DX,OFFSET MSGFINAL3     
     mov ah,09h
     int 21h
-            
+             
+    mov ah,02h
+    mov dx,10
+    int 21h
+    mov dx,13
+    int 21h
+    call mostrar_barcos           
+    ret
+    
     ret
 endp
 ;_________________________________________________________________________________________________________________________________
