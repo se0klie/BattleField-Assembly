@@ -1,17 +1,19 @@
 name "BATTLEFIELD JESUS SUAREZ,HAILIE JIMENEZ"  
 .model small
 .stack 100h
-.data
-;MATRIZ DEL JUGADOR
+.data                   
+
+;MATRIZ DEL JUGADOR     // inicializamos la matriz de jugador con 0s
 matriz_navios_comp db 36 dup(0)
 ;SETEO DE VARIABLES
-linha db 00h                            
+linea db 00h                            
 coluna db 00h
 sentido dw 00h
 endereco_lin_col dw 00h
 simbolo db 00h 
-tamanhobarco db 00h
-;COLUMNAS VALIDAS
+tamanobarco db 00h     
+
+;COLUMNAS VALIDAS       // creamos un arreglo de todas las columnas inputs validas para el usuario                     
 columnas_mayus db 'A', 'B', 'C', 'D', 'E', 'F'
 columnas_minus db 'a', 'b', 'c', 'd', 'e', 'f'
 cabecera_matriz db "  A B C D E F", 10, 13, "$"
@@ -105,7 +107,7 @@ LF EQU 10    ; LINEA
     LINHA_FINAL EQU 10
     COLUNA_FINAL EQU 17
 .code
-push_all MACRO  ; macro para salvar el contexto
+push_all MACRO  ; macro para salvar el contexto // se hace push a todos los registros utilizados
     push ax
     push bx
     push cx
@@ -116,7 +118,7 @@ push_all MACRO  ; macro para salvar el contexto
     push bp
 endm
 
-pop_all MACRO      ; macro para restaurar el contexto
+pop_all MACRO      ; macro para restaurar el contexto        // se hace pull a todos los registros utilizados
     pop bp
     pop di
     pop si
@@ -203,25 +205,25 @@ drawmiss proc    ;disena el simbolo de miss en la matriz de tiros
     pop_all
     ret
 endp 
-desenhaquadrado proc
+disenacuadrado proc
     push_all
     mov bh,02
     mov AH,09h
     mov AL,0A4h ; símbolo ASCII 254 (¦)
     mov CX,1
-    mov BL,0Eh  ; color amarillo
+    mov BL,0Eh 
     int 10h
     pop_all
     ret
 endp  
-victorymsg proc 
-    push_all
+victorymsg proc      ;escribe el mensaje de victoria mostrado al usuario cuando gana
+    push_all                ;primero guarda todo lo esencial
     ;Limpia la linea
     mov bh,02
     mov dh,22   ;linea para mandar mensajes
     mov dl,COLUNA_MENSAGENS
     call posicionacursor
-    mov DX,OFFSET MSG_LIMPA_MSG
+    mov DX,OFFSET MSG_LIMPA_MSG                ; carga el mensaje que limpia la linea
     call printstring
 
     ;Manda un mensaje
@@ -240,15 +242,15 @@ victorymsg proc
     int 15h
     pop_all
     ret
-endp  
-defeatmsg proc 
+endp                  
+defeatmsg proc                                  ; escribe el mensaje de derrota al usuario cuando pierde
     push_all
     ;Limpia la linea
     mov bh,02
     mov dh,22   ;linea donde se imprime el mensaje
     mov dl,COLUNA_MENSAGENS
     call posicionacursor
-    mov DX,OFFSET MSG_LIMPA_MSG
+    mov DX,OFFSET MSG_LIMPA_MSG                 ;se envia la linea para limpiar
     call printstring
 
     ;Manda un mensaje
@@ -256,7 +258,7 @@ defeatmsg proc
     mov dh,22 
     mov dl,COLUNA_MENSAGENS
     call posicionacursor
-    mov DX,OFFSET MSG_DERROTA   ;"HAS PERDIDO, MISILES AGOTADOS"
+    mov DX,OFFSET MSG_DERROTA                   ;"HAS PERDIDO, MISILES AGOTADOS"
     call printstring
     
     ;espera 5 segundos
@@ -268,14 +270,14 @@ defeatmsg proc
     pop_all
     ret
 endp  
-missedshot proc 
-    push_all
+missedshot proc              
+    push_all                                    ;carga todo lo esencial
     ;Limpia una linea
     mov bh,02
     mov dh,22   ;linea para mandar mensajes
     mov dl,COLUNA_MENSAGENS
     call posicionacursor
-    mov DX,OFFSET MSG_LIMPA_MSG
+    mov DX,OFFSET MSG_LIMPA_MSG                 ; limpia la linea
     call printstring
 
     ;Manda un mensaje
@@ -283,19 +285,19 @@ missedshot proc
     mov dh,22 
     mov dl,COLUNA_MENSAGENS
     call posicionacursor
-    mov DX,OFFSET MSG_MISS   ;"Error de tiro"
+    mov DX,OFFSET MSG_MISS                      ;"Error de tiro"
     call printstring
     pop_all
     ret
 endp
-hitshot proc 
+hitshot proc                                    ;muestra el mensaje de impacto
     push_all
     ;Limia la linea
     mov bh,02
     mov dh,22   ;linea para mandar mensajes
     mov dl,COLUNA_MENSAGENS
-    call posicionacursor
-    mov DX,OFFSET MSG_LIMPA_MSG
+    call posicionacursor                        
+    mov DX,OFFSET MSG_LIMPA_MSG                 ;limpia la linea
     call printstring
 
     ;Imprime un mensaje
@@ -303,7 +305,7 @@ hitshot proc
     mov dh,22   ;linea para mandar mensaje
     mov dl,COLUNA_MENSAGENS
     call posicionacursor
-    mov DX,OFFSET MSG_HIT   ;"Acerto el tiro!!"
+    mov DX,OFFSET MSG_HIT                       ;"Acerto el tiro!!"
     call printstring
     cmp tamano_p, 4
     je P_HUNDIDO
@@ -313,24 +315,24 @@ hitshot proc
     je S_HUNDIDO
     jne FIN_HITSHOT
   P_HUNDIDO:
-    lea DX,MSG_P_HUNDIDO   ;"Acerto el tiro!!"
+    lea DX,MSG_P_HUNDIDO                        ;"Acerto el tiro!!"
     call printstring
     mov tamano_p, 0
     jmp FIN_HITSHOT
   D_HUNDIDO:
-    lea DX,MSG_D_HUNDIDO   ;"Acerto el tiro!!"
+    lea DX,MSG_D_HUNDIDO                        ;"Acerto el tiro!!"
     call printstring
     mov tamano_d, 0
     jmp FIN_HITSHOT
   S_HUNDIDO:
-    lea DX,MSG_S_HUNDIDO   ;"Acerto el tiro!!"
+    lea DX,MSG_S_HUNDIDO                        ;"Acerto el tiro!!"
     mov tamano_s, 0
     call printstring    
   FIN_HITSHOT:
     pop_all
     ret
 endp  
-doublehit proc
+doublehit proc                                  ; imprime msg para mostrar que uso una posicion ya usada
     push_all
     ;Limpia la linea
     mov bh,02
@@ -351,101 +353,101 @@ doublehit proc
     ret
 endp  
 
-RNG proc
+RNG proc                                        ;genera posiciones random
     push_all
-    mov ah, 00h  ; Tomar el tiempo del sistema       
+    mov ah, 00h                                 ; Tomar el tiempo del sistema       
     int 1AH            
 
-    mov  ax, dx  ;move valor para dividir
+    mov  ax, dx                                 ;move valor para dividir
     xor  dx, dx  
-    mov  cx, 36;dividir por 100 para que el restante sea de 0 a 99  
-    div  cx       ; DX tener el resto de la division
+    mov  cx, 36                                 ;dividir por 100 para que el restante sea de 0 a 99  
+    div  cx                                     ; DX tener el resto de la division
     mov endereco_lin_col, dx
 
     push dx
     mov ax,dx
     xor dx,dx
-    mov cx, 6 ;dividir por 10 para agrefar el valor a la coluna
+    mov cx, 6                                   ;dividir por 10 para agrefar el valor a la coluna
     div cx
     mov coluna,dl
-    mov linha,al
+    mov linea,al
     pop dx
 
     mov ax,dx
     xor dx,dx
-    mov cx,2    ;elige el sentido
+    mov cx,2                                    ;elige el sentido
     div cx
     cmp dx,1
-    je RNGh     ;revisa por  1 = horizontal
+    je RNGh                                     ;revisa por  1 = horizontal
     mov sentido, 'v'
     jmp RNGok
-  RNGh:
+  RNGh:                                         ;sentido horizontal
     mov sentido, 'h'
   RNGok: 
-    pop_all
+    pop_all                                     ;vacia el stack
     ret
 endp  
-definemode proc ; define el modo
+definemode proc                                 ; define el modo
     push ax
-    mov al, 03h ; modo texto 80 x 25
-    mov ah, 00h ; modo de video
+    mov al, 03h                                 ; modo texto 80 x 25
+    mov ah, 00h                                 ; modo de video
     int 10h
     pop ax
     ret
 endp 
-changepage proc ; muda a pagina, o numero da pagina definido em al
+changepage proc                                 ; muda a pagina, o numero da pagina definido em al
     push ax
-    mov ah, 05h ; numero de interrupciones de BIOS
+    mov ah, 05h                                 ; numero de interrupciones de BIOS
     int 10h
     pop ax
     ret
 endp
    
-verificanavio proc ;proc para comprobar si no habra superposicion de barcos o bordes | necesita desplazamiento de matriz en SI y end_lin_col en BX
-    mov cl,tamanhobarco                                    ;Otimizar com pilha se der tempo
-    cmp sentido, 'h'
+verificanavio proc                              ;proc para comprobar si no habra superposicion de barcos o bordes | necesita desplazamiento de matriz en SI y end_lin_col en BX
+    mov cl,tamanobarco                         
+    cmp sentido, 'h'                            ;checks si la orientacion es horizontal
     je VERIFHORIZ 
-  VERIFVERT:  
+  VERIFVERT:                                    ;verifica si es vertical
 	cmp byte ptr [SI+BX], 0 ;Prueba si hay algo en la posicion
     ja VERIFICANAVIOINVALIDO     
     cmp BX,36
     jb NELV ;N?o Estoy en la linea vertical
     jmp VERIFICANAVIOINVALIDO
-    NELV: 
+    NELV:                                       ;va a la siguiente fila
     add BX,6
-    loop VERIFVERT ;Loop basado en el tamano del barco
+    loop VERIFVERT                              ;Loop basado en el tamano del barco
     jmp VALIDO
     
-  VERIFHORIZ:
-    mov cl,tamanhobarco
+  VERIFHORIZ:                                   ;verifica orientacion horizontal
+    mov cl,tamanobarco
     mov bl,coluna
-  LOOPVERIFHORIZ1: ;Prueba si no rompe la linea
+  LOOPVERIFHORIZ1:                              ;Prueba si no rompe la linea
     add BX, 1
     cmp BX,6
-    jb NELH   ;N?o Esoty en la linea horizontal
+    jb NELH                                     ;No estoy en linea horizontal
     ja VERIFICANAVIOINVALIDO
     NELH:
-    loop LOOPVERIFHORIZ1  ;Loop basado en el tamano del barco
+    loop LOOPVERIFHORIZ1                        ;Loop basado en el tamano del barco
     mov BX,endereco_lin_col
-    mov cl,tamanhobarco
+    mov cl,tamanobarco
   LOOPVERIFHORIZ2:              
-    cmp byte ptr[SI+BX], 0 ;Prueba si hay algo en la posicion
-    ja VERIFICANAVIOINVALIDO
+    cmp byte ptr[SI+BX], 0                      ;Prueba si hay algo en la posicion
+    ja VERIFICANAVIOINVALIDO                    ;si hay error por index, jump a invalido
     add BX, 1
     loop LOOPVERIFHORIZ2    
     jmp VALIDO
    
-  VERIFICANAVIOINVALIDO:  ;se busca invalido, BX = 100 
+  VERIFICANAVIOINVALIDO:                        ;se busca invalido, BX = 100 
     mov BX,100
-    jmp FIM_VERIFICACAO   
+    jmp FIM_VERIFICACION   
   VALIDO:   ;Si es valido reestablece los valores
     mov bx, endereco_lin_col
-    mov cl, tamanhobarco
-  FIM_VERIFICACAO:
+    mov cl, tamanobarco
+  FIM_VERIFICACION:
     ret
 endp
     
-readinputaction proc                       ; Lee los datos de entrada del disparo
+readinputaction proc                            ; Lee los datos de entrada del disparo
    push_all
    
     mov cx, 2
@@ -454,16 +456,16 @@ readinputaction proc                       ; Lee los datos de entrada del dispar
     cmp cx, 0
     je LEERFILA
   LEERCOLUMNA:
-    call readkeyboard
-    cmp al, CR              ; verifica si es ENTER
+    call readkeyboard                           ; lee input de keyboard
+    cmp al, CR                                  ; verifica si es ENTER
     jz LEERCOLUMNA ; je
      
     cmp al, 'a'
-    jl INPUT_MAYUS
+    jl INPUT_MAYUS                              ;checa si ingreso una minus
     jge INPUT_MINUS
     
   INPUT_MAYUS:
-    cmp al, 'A'             ; verifica si es valido
+    cmp al, 'A'                                 ; verifica si es valido
     jb LEERCOLUMNA 
   
     cmp al, 'F'
@@ -472,7 +474,7 @@ readinputaction proc                       ; Lee los datos de entrada del dispar
     jmp COL_VALIDA    
     
   INPUT_MINUS:
-    cmp al, 'a'             ; verifica si es valido
+    cmp al, 'a'                                 ; verifica si es valido
     jb LEERCOLUMNA 
   
     cmp al, 'f'
@@ -504,15 +506,15 @@ readinputaction proc                       ; Lee los datos de entrada del dispar
     call writechar
     
   VALORCOLUNAACTION:
-    mov coluna,bl      ;COLUMNA
+    mov coluna,bl                                ;COLUMNA
     mov cx,1
     jmp PULOACTION
   LEERFILA:
     call readkeyboard
-    cmp al,CR              ; verifica si es ENTER
+    cmp al,CR                                   ; verifica si es ENTER
     jz LEERFILA ; je
      
-    cmp al,'1'             ; verificar si es valido
+    cmp al,'1'                                  ; verificar si es valido
     jb LEERFILA 
   
     cmp al,'6'
@@ -521,29 +523,29 @@ readinputaction proc                       ; Lee los datos de entrada del dispar
     call writechar
     sub al,'1'
     mov ah,0
-    mov linha,al
+    mov linea,al
     mov dl,6
     mul dl
     mov ah, coluna
-    add al,ah      ;(linha*10)+coluna
+    add al,ah                                   ;(linea*10)+coluna
     xor ah,ah
-    mov endereco_lin_col,ax  ;mover direccion decimal = posicion el vector
+    mov endereco_lin_col,ax                     ;mover direccion decimal = posicion el vector
     pop_all  
   ret
 endp  
-addbarco proc  ;necesita indice en BX, direccion de matriz en SI y tamano de barco en CX
+addbarco proc                                   ;necesita indice en BX, direccion de matriz en SI y tamano de barco en CX
     push dx
     push cx
-    ;mov dl,1        ;AQUI SE PONE EL VALOR EN LA MATRIZ DE JUEGO
-    cmp ubicando_portaviones, 1
+    
+    cmp ubicando_portaviones, 1                 ;comprueba si estan ubicados los barcos
     je UBICAR_PORTAVIONES
     cmp ubicando_destructor, 1
     je UBICAR_DESTRUCTOR
     cmp ubicando_submarino, 1
     je UBICAR_SUBMARINO
     
-    UBICAR_PORTAVIONES:
-        mov dl, 'P'
+    UBICAR_PORTAVIONES:                         ;asigna p a portaviones
+        mov dl, 'P'                             ;salta a definir sentido
         jmp DEFINIR_SENTIDO
     UBICAR_DESTRUCTOR:
         mov dl, 'D'
@@ -552,49 +554,49 @@ addbarco proc  ;necesita indice en BX, direccion de matriz en SI y tamano de bar
         mov dl, 'S'
     
     DEFINIR_SENTIDO:
-        cmp sentido, 'h'
+        cmp sentido, 'h'                        ;comprueba si es horizontal
         je HORIZONTAL
     
   VERTICAL:     
-    mov [SI+BX],dl ;Coloca valor de DL en la posicion BX de la matriz ("vetor")
+    mov [SI+BX],dl                              ;Coloca valor de DL en la posicion BX de la matriz ("vetor")
     add BX, 6
-    loop VERTICAL ;LOOP Decrementa o cx
+    loop VERTICAL                               ;LOOP Decrementa o cx
     jmp BARCOOK
   HORIZONTAL:
-    mov [SI+BX], dl ;Coloca valor de DL en la posicion BX de la matriz ("vetor")
+    mov [SI+BX], dl                             ;Coloca valor de DL en la posicion BX de la matriz ("vetor")
     add BX, 1
-    loop HORIZONTAL
+    loop HORIZONTAL                             ;decrementa cx mientras no sea 0 y repite el bucle
     jmp BARCOOK
     
   BARCOOK:
-    pop cx
+    pop cx                                      ;restaura valor de cx desde la pila
     pop dx 
     ret
 endp   
-atualizastats proc 
-    push_all
+actualizarstats proc 
+    push_all                                    ;GUARDA REGISTROS ANTES DE COMENZAR
     ;Tiros Jugador 
     xor CX, CX
-    mov BH, 02
-    mov DL, coltiros
-    mov DH, lintiros
+    mov BH, 02                                  ;SELECCIONA PAG 2
+    mov DL, coltiros                            ;COLUMNA DONDE SE MUESTRAN LOS TIROS
+    mov DH, lintiros                            ;FILAS DONDE SE MUESTRAN LOS TIROS
     call posicionacursor
       xor DX,DX
       xor AX,AX
 	  mov DL, tiros
-	  add DL, 48
-	  REPETETIROS:
-	  cmp DL, 58
-	  jb ESCREVETIROS
+	  add DL, 48                                ;CONVIERTE A ASCII
+	  TIROSREP:
+	  cmp DL, 58                                ;COMPARA DL CON ":"
+	  jb ESCRIBETIROS
 	  sub DL, 10
 	  inc AL
 	  mov DH, AL
-	  loop REPETETIROS 
-	  ESCREVETIROS:
+	  loop TIROSREP 
+	  ESCRIBETIROS:                             ;REPITE BUCLE HASTA QE CX = 0
 	  mov AL, DL
 	  mov DL, DH
 	  add DL, 48
-	  call writedirect
+	  call writedirect                          ;ESCRIBE EN PANTALLA
 	  mov DL, coltiros+1 
       mov DH, lintiros
     call posicionacursor
@@ -606,20 +608,20 @@ atualizastats proc
     xor AX,AX
     xor CX, CX
     ;Aciertos Jugador
-	mov DL, coltiros
+	mov DL, coltiros                            ;hace lo mismo que en la parte superior pero con los aciertos
     mov DH,linacertos
     call posicionacursor
       xor DX,DX
 	  mov DL, acertos
 	  add DL, 48
-	  REPETEACERTOS:
+	  ACIERTOSREP:
 	  cmp DL, 58
-	  jb ESCREVEACERTOS
+	  jb ESCRIBEACIERTOS
 	  sub DL, 10
 	  inc AL
 	  mov DH, AL
-	  loop REPETEACERTOS 
-	  ESCREVEACERTOS:
+	  loop ACIERTOSREP 
+	  ESCRIBEACIERTOS:
 	  
 	  mov DL, coltiros+1
       mov DH, linacertos
@@ -630,32 +632,33 @@ atualizastats proc
     pop_all
     ret
 endp  
-        fireshot proc ;"Dispara" la toma modificando el vector, la matriz de pantalla y actualizando las estadisticas
-; 
-   push bx
+   
+   
+fireshot proc                           ;"Dispara" la toma modificando el vector, la matriz de pantalla y actualizando las estadisticas
+    push bx
     mov SI, OFFSET matriz_navios_comp
     mov al, bl
     mov BX, endereco_lin_col
     mov byte ptr[SI+BX], al
     pop bx
     ;Vector modificado   
-    cmp bx, 'P'
+    cmp bx, 'P'                         ;compara si golpeo un portaviones
     je GOLPE
-    cmp bx, 'D'
-    je GOLPE
+    cmp bx, 'D'                         ;compara si fue un destryctir
+    je GOLPE                            ;compara si golpeo un submarino
     cmp bx, 'S'
     je GOLPE
-    jmp MISS
+    jmp MISS                            ;saltp a miss
 
 
 
   GOLPE:
-    mov bh,coluna       ;pisicion 0,0 temporal linea 7 y columna 4
+    mov bh,coluna                               
     mov al,2
-    mul bh     ;multiplica por 2 para obtener el equivalente "grafico"
-    add al,4  ;Suma con columna inicial
-    mov bh,02 ;pagina atual
-    mov dh,linha
+    mul bh                                      ;multiplica por 2 para obtener el equivalente "grafico"
+    add al,4                                    ;Suma con columna inicial
+    mov bh,02                                   ;pagina atual
+    mov dh,linea
     add dh,7
     mov dl,al
     call posicionacursor
@@ -669,25 +672,24 @@ endp
   MISS:
     mov bh,coluna
     mov al,2
-    mul bh     ;multiplica por 2 para encontrar el equivalente "grafico"
-    add al,4  ;Suma con columna inicial
-    mov bh,02 ;pagina atual 
-    mov dh,linha
+    mul bh                                      ;multiplica por 2 para encontrar el equivalente "grafico"
+    add al,4                                    ;Suma con columna inicial
+    mov bh,02                                   ;pagina atual 
+    mov dh,linea
     add dh,7
     mov dl,al
     call posicionacursor
-    call drawmiss
+    call drawmiss                               ;dibuja el fallo
     ;Matriz de pantalla modificada
 
     inc tiros 
-    
+                                                ;incremento tiros hasta 18
   FIM_FS:
     ret
-endp
-;_________________________________________________________________________________________________________________________________
-;_________________________________________________________________________________________________________________________________
-configboardcomputer proc  ;proc para crear el tablero del computador
-    ;"Colocando los barcos del computador."
+endp  
+
+configboardcomputer proc                        ;crea el tablero como computador
+                                                ;"Colocando los barcos del computador."
     mov bh,2
     mov dh,19
     mov dl,COLUNA_CONFIG+1
@@ -702,21 +704,21 @@ configboardcomputer proc  ;proc para crear el tablero del computador
     mov DX, OFFSET MSG_CONFIG22
     call printstring
    
-    ;Ubicacion
-  CPU_PORTA_AVIOES:
+    ;Ubicacion del portaviones
+  CPU_PORTA_AVIONES:
     mov ubicando_portaviones, 1
     mov ubicando_destructor, 0
     mov ubicando_submarino, 0   
     call RNG ;"input" del computador
     mov bx, endereco_lin_col
-    mov tamanhobarco, 5
+    mov tamanobarco, 5
     mov SI, OFFSET matriz_navios_comp 
     call verificanavio
-    cmp BX,100  ;si es 100, la posicion no es valida
+    cmp BX,100                      ;si es 100, la posicion no es valida
     jne CPU_AVALIDO
-    jmp CPU_PORTA_AVIOES
+    jmp CPU_PORTA_AVIONES
   CPU_AVALIDO:
-    call addbarco ;agregar el barco al vector de barcos
+    call addbarco                   ;agregar el barco al vector de barcos
 
   CPU_NAVIO_GUERRA:
     mov ubicando_portaviones, 0
@@ -724,9 +726,9 @@ configboardcomputer proc  ;proc para crear el tablero del computador
     mov ubicando_submarino, 0  
     call RNG ;"input" del computador
     mov bx, endereco_lin_col
-    mov tamanhobarco, 3
+    mov tamanobarco, 3
     call verificanavio
-    cmp BX,100  ;si es 100, la posicion no es valida
+    cmp BX,100                      ;si es 100, la posicion no es valida
     jne CPU_BVALIDO
     jmp CPU_NAVIO_GUERRA
   CPU_BVALIDO:
@@ -738,7 +740,7 @@ configboardcomputer proc  ;proc para crear el tablero del computador
     mov ubicando_submarino, 1   
     call RNG ;"input" del computador
     mov bx, endereco_lin_col
-    mov tamanhobarco, 3
+    mov tamanobarco, 3
     call verificanavio
     cmp BX,100  ;si es 100, la posicion no es valida
     jne CPU_SVALIDO
@@ -747,64 +749,61 @@ configboardcomputer proc  ;proc para crear el tablero del computador
     call addbarco ;agregar el barco al vector de barcos
  
     ret
-endp
-;_________________________________________________________________________________________________________________________________
-;_________________________________________________________________________________________________________________________________
-desenhabarco proc ;proc dibujar los barcos en la pantalla
-    ;la posici?n 0.0 tiene la linea 7 y la columna 33 --- la posicion 9.9 tiene la l?nea 16 y la columna 51
-    ;preparacaoo das coordenadas
-    add linha,7 ;convertir de ascii a decimal y agregar 7 de la l?nea de inicio
+endp                        
+
+disenobarco proc                        ;proc poner barcos en pantalla
+   
+    add linea,7                         ;convertir de ascii a decimal y agregar 7 de la l?nea de inicio
     mov bh,coluna
     mov al,2
-    mul bh     ;multiplica por 2 para tener el equivalente "grafico"
-    add al,33  ;suma con columna inicial
+    mul bh                              ;multiplica por 2 para tener el equivalente "grafico"
+    add al,33                           ;suma con columna inicial
     mov coluna,al
 
     ;posicionamento cursor                                                                         
-    mov dh,linha 
+    mov dh,linea 
     mov dl,coluna
-  LOOPDESENHO:  
+  LOOPDISENO:  
     mov bh,2
     call posicionacursor
-    ;diseno s?simbolo
+    
     mov al, simbolo
     mov bh,2 ; pagina
     mov bl,0Fh  ;el color blanco
-    call drawsymbol
+    call drawsymbol 
+    
     ;incremento
     cmp sentido, 'h'
     je DHORIZONTAL
-    inc dh ;si es vertical, s? Incrementar fila y columna permanecen iguales
-    loop LOOPDESENHO
-    jmp FIMDESENHO
+    inc dh                              ;si es vertical, s? Incrementar fila y columna permanecen iguales
+    loop LOOPDISENO
+    jmp FINDISENO
   DHORIZONTAL:
-    add dl,2 ;si es horizontal, se incrementa en 2 porque graficamente 1 columna tiene 2 espacios
-    loop LOOPDESENHO 
-    jmp FIMDESENHO
-  FIMDESENHO:
+    add dl,2                            ;si es dos, se incrementa 1 porque una columna ocupa 2 espacios
+    loop LOOPDISENO 
+    jmp FINDISENO
+  FINDISENO:
     ret
 endp
-
-;_________________________________________________________________________________________________________________________________
-;_________________________________________________________________________________________________________________________________
-verifyshot proc ;comprueba si el tiro del jugador acerto o no, mostrando el mensaje apropiado
-    mov bx,0
-    mov cx,20
-    mov SI,OFFSET tiros_repetidos
-    mov ax,endereco_lin_col
-  VERIFICAR_DUPLICADO:
-    cmp byte ptr [SI+BX],al
+ 
+verifyshot proc                         ;comprueba el tiro
+    mov bx,0                            ;limite es 18 tiros
+    mov cx,18
+    mov SI,OFFSET tiros_repetidos       ;puntero al arreglo de tiros
+    mov ax,endereco_lin_col             ;carga pos del tiro en AX
+  VERIFICAR_DUPLICADO:                  ;VERIFICA LOS DUPLICADOS
+    cmp byte ptr [SI+BX],al             ;SI ESTA DUPLICADO, SALTA
     je TIRO_DUPLO
     inc bx
-    loop VERIFICAR_DUPLICADO
+    loop VERIFICAR_DUPLICADO            ;SIGUE VERIFICANDO
     
-    mov ax,endereco_lin_col
+    mov ax,endereco_lin_col             ;GUARDA LA POSICION DEL TIRO PARA LUEGO ALMACENARLO COMO REPETIDO
     mov bh,0
     mov bl,tiros
-    mov SI,OFFSET tiros_repetidos
-    mov byte ptr [SI+BX],al
+    mov SI,OFFSET tiros_repetidos       ;PUNTERO A TIROS REP
+    mov byte ptr [SI+BX],al             ;ALMACENA EN TIROS REP
     
-    mov bx,endereco_lin_col   
+    mov bx,endereco_lin_col             ;AQUI VERIFCA A QUE LE GOLPEO
     mov SI,OFFSET matriz_navios_comp
     cmp byte ptr [SI+BX], 'P'
     je GOLPEO_PORTAVIONES
@@ -814,49 +813,47 @@ verifyshot proc ;comprueba si el tiro del jugador acerto o no, mostrando el mens
     je GOLPEO_SUBMARINO        
     
     call missedshot
-    mov bx,0   ;Si esta mal, BX sale del proceso con 0
+    mov bx,0                            ;SALE DEL PROCESO
     jmp fimVS
   GOLPEO_PORTAVIONES:
     call hitshot
-    mov bx,'P'   ;Si lo hizo bien, BX sale del proceso con 1
+    mov bx,'P'                          ;LLAMA A FUNCION PARA DECIR QUE FUE ACIERTO
     jmp fimVS
   GOLPEO_DESTRUCTOR:
     call hitshot
-    mov bx,'D'   ;Si lo hizo bien, BX sale del proceso con 1
+    mov bx,'D'                          ;LLAMA A FUNCION PARA DECIR QUE FUE ACIERTO
     jmp fimVS
   GOLPEO_SUBMARINO:
     call hitshot
-    mov bx,'S'   ;Si lo hizo bien, BX sale del proceso con 1
+    mov bx,'S'                          ;LLAMA A FUNCION PARA DECIR QUE FUE ACIERTO
     jmp fimVS
   TIRO_DUPLO:
     call doublehit
-    mov bx,2   ;Si ya ha disparado en posicion, BX sale del proceso con 2
+    mov bx,2                            ;LLAMA A FUNCION PARA DECIR QUE FUE ACIERTO
   fimVS:
     ret
 endp
-
-;_________________________________________________________________________________________________________________________________
-;_________________________________________________________________________________________________________________________________
+ 
 yourturn proc
     push_all
   LER_OUTRO_INPUT:  
     mov bh,02
-    mov dh,22   ;linea para mandar mensajes
+    mov dh,22                           ;COLUMNA PARA MSJS
     mov dl,COLUNA_MENSAGENS
     call posicionacursor
     push dx
-    mov DX, OFFSET MSG_LIMPA_MSG ;Limpa el espacio para los mensajes
+    mov DX, OFFSET MSG_LIMPA_MSG        ;Limpa el espacio para los mensajes
     call printstring
 
     pop dx
     call posicionacursor
-    mov DX, OFFSET MSG_TURNO1   ;Pide el input
-    call printstring
+    mov DX, OFFSET MSG_TURNO1           ;PIDE INPIUT
+    call printstring                    ;IMPRIME
 
-    mov dh,22
-    mov dl,COLUNA_COORDENADAS
+    mov dh,22                           ;LINEA PARA COORDENADAS
+    mov dl,COLUNA_COORDENADAS           ;LINEA PARA COLUMNA
     call posicionacursor
-    mov DX, OFFSET MSG_LIMPA_COOR ;Limpia el espacio de coordenadas
+    mov DX, OFFSET MSG_LIMPA_COOR       ;Limpia el espacio de coordenadas
     call printstring
     mov dh,22
     mov dl,COLUNA_COORDENADAS
@@ -872,17 +869,18 @@ yourturn proc
     mov columnas_minus[2], 'c'
     mov columnas_minus[3], 'd'
     mov columnas_minus[4], 'e'
-    mov columnas_minus[5], 'f'
-    call readinputaction ;lee el input
-    call verifyshot ;Verifica el contenido
+    mov columnas_minus[5], 'f'   
+    
+    call readinputaction                ;lee el input
+    call verifyshot                     ;Verifica el contenido
     cmp bx,2
     je LER_OUTRO_INPUT
-    call fireshot ;Si es valido, realiza el tiro
-    cmp bx,0 ;compara para saber si el resultado es verificado
-    jne ATIRAR  ;si es 2, lee otra entrada
+    call fireshot                       ;REALIZA EL TIRO
+    cmp bx,0                            ;compara para saber si el resultado es verificado
+    jne ATIRAR  
     jmp LER_OUTRO_INPUT    
     
-  ATIRAR:
+  ATIRAR:                               ;COMPARA QUE GOLPEO
     cmp bl, 'P'
     je INCREMENTAR_CONTADOR_P
     cmp bl, 'D'
@@ -898,18 +896,16 @@ yourturn proc
   INCREMENTAR_CONTADOR_S:
     inc tamano_s
   STATS:
-    call atualizastats  ;Actualiza el cuadro de stats
+    call actualizarstats                 ;Actualiza el cuadro de stats
     pop_all
     ret
 endp
-
-;_________________________________________________________________________________________________________________________________
-;_________________________________________________________________________________________________________________________________
+    
 readinitgame proc                   ; lee la entrada ENTER para jugar S - SALIR
     push ax
   LECTURAJUEGO:
     call readkeyboard
-    cmp al, CR              ; verifica el ENTER
+    cmp al, CR                      ; verifica el ENTER
     je INICIARJUEGO
     cmp al, 's'
     je SALIRJUEGO
@@ -924,9 +920,7 @@ readinitgame proc                   ; lee la entrada ENTER para jugar S - SALIR
     ret
 endp
 
-;_________________________________________________________________________________________________________________________________
-;_________________________________________________________________________________________________________________________________
-game_screen proc      ;Disena la pantalla principal de JUEGO
+game_screen proc                 ;Disena pag principal
     mov ubicando_portaviones, 0
     mov ubicando_destructor, 0
     mov ubicando_submarino, 0
@@ -942,7 +936,7 @@ game_screen proc      ;Disena la pantalla principal de JUEGO
     mov DH,BL    
     call posicionacursor 
     push DX
-    mov DX,OFFSET MSGJUEGOTIRO1     
+    mov DX,OFFSET MSGJUEGOTIRO1   ;COMIENZA A IMPRIMIR LAS LINEAS DE MATRIZ  
     call printstring
     pop DX  
     inc BL
@@ -1027,25 +1021,26 @@ game_screen proc      ;Disena la pantalla principal de JUEGO
     pop DX  
     inc BL
      
-    ;Marco dibujado, rellenar con cuadrados ahora
+    ;MATRIZ LISTA
+    
     mov CX,36
-    mov DH, 7  ;La posicion 0.0 de la primera fila tiene la fila 7 y la columna 4
+    mov DH, 7                           ;La posicion 0.0 de la primera fila tiene la fila 7 y la columna 4
     mov DL,COLUNA_TIRO+3
-  DESENHA_MATRIZ_TIRO:  
+  DISENAMATRIZTIRO:  
     call posicionacursor
-    call desenhaquadrado    
-    cmp DL,14      ;22 es la ultima posicion de cada linea, si pasa, pasa a la siguiente linea
-    je LINHANOVA
-    add DL,2       ;incrementa columna
+    call DISENACUADRADO    
+    cmp DL,14                           ;22 es la ultima posicion de cada linea, si pasa, pasa a la siguiente linea
+    je LINEANUEVA
+    add DL,2                            ;incrementa columna
   PULOQUADRADO:
-    loop DESENHA_MATRIZ_TIRO
-    jmp FIMMATRIZTIRO  ;salta cuando hayas terminado
-  LINHANOVA:
+    loop DISENAMATRIZTIRO
+    jmp FINMATRIZTIRO  ;salta cuando hayas terminado
+  LINEANUEVA:
     mov DL,COLUNA_TIRO+3
     inc DH
     jmp PULOQUADRADO
     
-  FIMMATRIZTIRO:
+  FINMATRIZTIRO:
     ;Matriz de disparo completo, termine de dibujar la pantalla
     mov BL,3 ; Linha inicial
     ;mov DL,COLUNA_STATS 
@@ -1054,13 +1049,13 @@ game_screen proc      ;Disena la pantalla principal de JUEGO
     mov DH,BL    
     call posicionacursor 
     push DX
-    ;mov DX,OFFSET MSGSTAT2     
+    ;mov DX,OFFSET MSGSTAT2                          
     call printstring
     pop DX  
     inc BL
     
     
-    call atualizastats
+    call actualizarstats                       ;ACTUALIZA LOS TIROS
     
     ;Limpar el cuadro de mensajes
     mov BL, 18 ; Linea Inicial
@@ -1068,7 +1063,7 @@ game_screen proc      ;Disena la pantalla principal de JUEGO
     mov DH,BL    
     call posicionacursor 
     push DX
-    mov DX,OFFSET MSG_LIMPA_MSG     
+    mov DX,OFFSET MSG_LIMPA_MSG                    ;LIMPIA TODO
     call printstring
     pop DX 
     inc BL 
@@ -1091,12 +1086,12 @@ game_screen proc      ;Disena la pantalla principal de JUEGO
     pop DX  
     inc BL 
                
-    ;Tablero de estadisticas
+    
     mov DL,COLUNA_TIRO
     mov DH,BL    
     call posicionacursor 
     push DX
-    mov DX,OFFSET MSGINPUT1     
+    mov DX,OFFSET MSGINPUT1                    ;MUESTRA LAS ESTADISTICAS
     call printstring
     pop DX  
     inc BL
@@ -1112,10 +1107,8 @@ game_screen proc      ;Disena la pantalla principal de JUEGO
     pop_all
     ret
 endp
-
-;_________________________________________________________________________________________________________________________________
-;_________________________________________________________________________________________________________________________________
-start_screen proc ;Disena la pantalla inicial -- OK
+ 
+start_screen proc                            ;PANTALLA PRINCIPAL
     push_all
     
     mov AH,02h ;posiciona el cursor
@@ -1136,12 +1129,11 @@ start_screen proc ;Disena la pantalla inicial -- OK
     
     pop_all
     ret
-endp
-;_________________________________________________________________________________________________________________________________
-;_________________________________________________________________________________________________________________________________
-mostrar_barcos proc
+endp  
+
+mostrar_barcos proc                   ;COMIENZA MOSTRANDO LOS BORDES
     mov ah,02h
-    mov dl,32
+    mov dl,32                          ;IMPRIME CARACTERES A-F
     int 21h
     int 21h
     mov dl,'A'
@@ -1166,7 +1158,7 @@ mostrar_barcos proc
     int 21h
     mov dl,'F'
     int 21h
-    mov dl,10
+    mov dl,10                        ;SALTO DE LINEA Y RETORNO DE CARRO
     int 21h
     mov dl,13      
     int 21h
@@ -1175,45 +1167,44 @@ mostrar_barcos proc
     mov si,0
     
     mov bl, '1'
-  NUMEROFILA:
+  NUMEROFILA:                        ;BUCLE PARA IMPRIMIR EL NUMERO DE FILA          
     mov dl,bl
     int 21h
-    mov cx,6
+    mov cx,6                         ;INICIALIZA CONTADOR DE CELDAS
        
-  CELDAS:
+  CELDAS:                            ;imprimE CELDAS
     mov dl,32
     int 21h
-    mov dl,matriz_navios_comp[si]
+    mov dl,matriz_navios_comp[si]     ;MUESTRA EL CONTENIDO EN EL INDICE SI DE LA MATRIZ BARCSO
     int 21h
     inc si
-    loop CELDAS
+    loop CELDAS                       ;REPETIR HASTA QUE SE IMPRIMA TODO
     mov dl,10
     int 21h
     mov dl,13      
     int 21h
     inc bl          
     inc di      
-    cmp di,6       
+    cmp di,6                         ;IR AL INICIO SI AUN QUEDAN FILAS
     jl  NUMEROFILA
   ret
-endp    
-;_________________________________________________________________________________________________________________________________
-;_________________________________________________________________________________________________________________________________
-finalscreen proc  ;disena la pantalla final 
+endp   
+
+finalscreen proc                    ;DISENA PANTALLA FINAL 
     mov al,3
     call changepage
     mov bh,al
                     
     
-    mov AH,02h ;posiciona el cursor
-    mov DL,COLUNA_FINAL
-    mov DH,11
-    int 10h 
+    mov AH,02h                      ;posiciona el cursor
+    mov DL,COLUNA_FINAL             ;POSICION DEL CURSOR
+    mov DH,11                       ;FILA TAMBIEN DEL CURSOR
+    int 10h                         ;INTERRUPCION PARA UBICAR CURSOR
     mov DX,OFFSET MSGFINAL1     
     mov ah,09h
     int 21h
     
-    mov AH,02h ;posiciona el cursor
+    mov AH,02h 
     mov DL,COLUNA_FINAL
     mov DH,12
     int 10h 
@@ -1221,7 +1212,7 @@ finalscreen proc  ;disena la pantalla final
     mov ah,09h
     int 21h
     
-    mov AH,02h ;posiciona el cursor
+    mov AH,02h                      ;MUESTRA LOS MENSAJES DE PANTALLA FINAL
     mov DL,COLUNA_FINAL
     mov DH,13
     int 10h 
@@ -1229,7 +1220,7 @@ finalscreen proc  ;disena la pantalla final
     mov ah,09h
     int 21h
              
-    mov ah,02h
+    mov ah,02h                     ;MUESTRA LA MATRIZ ORIGINAL Y LAS UBICACIONES
     mov dx,10
     int 21h
     mov dx,13
@@ -1238,24 +1229,23 @@ finalscreen proc  ;disena la pantalla final
     ret
     
     ret
-endp
-;_________________________________________________________________________________________________________________________________
-;_________________________________________________________________________________________________________________________________
-start proc                          ; proc inicial
-    call definemode
+endp        
+
+start proc                          ;PROCEDIMIENTO INIDICAL
+    call definemode                  ;DEFINIMOS MODO DE VIDEO
     call start_screen                ; llama al proc para escribir la pantalla de bienvenida y elegir si jugar o salir
 
   
   JUGARDENUEVO:
 	xor AX, AX                 
 	mov DI, OFFSET matriz_navios_comp    
-	mov cx, 100                 
-	rep stosw 
+	mov cx, 50                 
+	rep stosw                        ;REPETIR HASTA Q 100 PALABRAS SE INICIALICEN CON 0
     call configboardcomputer        ; llamar a proc para preparar la placa de la computadora
-    call game_screen 
+    call game_screen                ;COMIENZA A LLAMARSE OTROS METODOS PARA INICIAR
 GAMESTART:
-    call yourturn
-    cmp tiros, 18
+    call yourturn                     ;GENERA TURNO DE USUARIO
+    cmp tiros, 18                     ;LIMITE DE TIROS
     je USUPERDIO
        
     cmp acertos,11 ;5+3+3 = 11       ;11 aciertos gana    
@@ -1263,20 +1253,20 @@ GAMESTART:
     jmp GAMESTART
     
     
-USERGANO:
+USERGANO:                            ;SI GANA SE MUESTRA PANTALLA DE victoria
     call victorymsg
-    jmp FINALSCREENN
+    jmp FINALSCREEN2
    
-USUPERDIO:
+USUPERDIO:                           ;SI PIERDE LE LLEVA A LA PANTALLA DE PERDEDOR Y LE MUESTRA LA
     call defeatmsg
-    jmp FINALSCREENN 
-FINALSCREENN:
+    jmp FINALSCREEN2 
+FINALSCREEN2:
     call finalscreen
-    jmp LEITURAFINAL
+    jmp LECTURAFINAL
     
-TELA_FINAL:
+PAGFINAL:                            ;PANTALLA FINAL
     call finalscreen
-LEITURAFINAL:
+LECTURAFINAL:                        ;MUESTRA OPCIONES DE ESA PANTALLA
     call readkeyboard
     cmp al, 'j'
     je JUGARDENUEVO  
@@ -1286,32 +1276,29 @@ LEITURAFINAL:
     je SALIRJUEGO2
     cmp al, 'S'
     je S_SALIR
-    jmp LEITURAFINAL
+    jmp LECTURAFINAL
       
-   M_JUGAR:
+   M_JUGAR:                          ;REPLAY
     jmp JUGARDENUEVO
     
-   S_SALIR:
+   S_SALIR:                          ;EXIT DE LA APP
     jmp SALIRJUEGO2 
    
 
     
     
-  SALIRJUEGO2:
+  SALIRJUEGO2:                      ;CERRAR
     call exit
 
 ret
 endp
-
-;_________________________________________________________________________________________________________________________________
-;_________________________________________________________________________________________________________________________________
-exit proc                           ; proc para salir del JUEGO
+      
+exit proc                           ; SALIR DEL JUEGI 'S'
     mov ax, 41h
     int 21h ;DOS interrupts.
 ret
-endp
-;_________________________________________________________________________________________________________________________________
-;_________________________________________________________________________________________________________________________________
+endp 
+
 inicio:
     mov ax,@data                    ; ax apunta al segmento de datos
     mov ds,ax                       ; copia para ds
