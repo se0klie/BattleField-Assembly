@@ -100,7 +100,7 @@ LF EQU 10    ; LINEA
     ;MSGFINAL1 db 0C9h,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0CDh,0BBh,'$'
     MSGFINAL1 db 0BAh,'               FIN  DEL  JUEGO              ',0BAh,'$'
     MSGFINAL2 db 0BAh,'                                            ',0BAh,'$'
-    MSGFINAL3 db 0BAh,'   [R]einiciar   [J]ugar de nuevo   [S]alir ',0BAh,'$'
+    MSGFINAL3 db 0BAh,'      [J]ugar de nuevo       [S]alir        ',0BAh,'$'
    
     LINHA_FINAL EQU 10
     COLUNA_FINAL EQU 17
@@ -1276,7 +1276,7 @@ FINALSCREENN:
     
 TELA_FINAL:
     call finalscreen
-  LEITURAFINAL:
+LEITURAFINAL:
     call readkeyboard
     cmp al, 'j'
     je JUGARDENUEVO  
@@ -1286,10 +1286,6 @@ TELA_FINAL:
     je SALIRJUEGO2
     cmp al, 'S'
     je S_SALIR
-    cmp al, 'r'
-    je REINICIAR 
-    cmp al, 'R' 
-    je R_REINICIAR
     jmp LEITURAFINAL
       
    M_JUGAR:
@@ -1298,35 +1294,15 @@ TELA_FINAL:
    S_SALIR:
     jmp SALIRJUEGO2 
    
-   R_REINICIAR:
-    jmp REINICIAR 
+
     
     
   SALIRJUEGO2:
     call exit
-  REINICIAR:
-    call restart
-ret
-endp
-;_________________________________________________________________________________________________________________________________
-;_________________________________________________________________________________________________________________________________  
-restart proc
-	push_all                  
-	
-	xor AX, AX                 
-	mov DI, OFFSET matriz_navios_comp    
-	mov cx, 100                 
-	rep stosw                  
-	
-	
-	mov tiros, 0
-	mov acertos, 0  
-	
-	call start
 
-	pop_all
 ret
 endp
+
 ;_________________________________________________________________________________________________________________________________
 ;_________________________________________________________________________________________________________________________________
 exit proc                           ; proc para salir del JUEGO
